@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Misiones de Ciudadanía Digital - 1º Secundaria</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #1a1d24;
+            --surface-color: #242831;
+            --primary-color: #5865f2;
+            --text-color: #f0f0f0;
+            --text-muted: #a0a0b0;
+            --accent-gradient: linear-gradient(45deg, #5865f2, #a458f2);
+            --shadow: 0 10px 30px rgba(0,0,0,0.3);
+            --border-radius: 16px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+
+        #widget-container {
+            width: 100%;
+            max-width: 850px;
+            height: 540px; 
+            background-color: var(--surface-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+        }
+
+        #missions-list-container {
+            flex: 0 0 300px;
+            overflow-y: auto;
+            position: relative;
+            /* Esconde la barra de scroll */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;  /* IE and Edge */
+        }
+        #missions-list-container::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, and Opera */
+        }
+
+        /* Espacio de búfer para permitir que la primera y última tarjeta lleguen al centro */
+        #missions-list-container::before,
+        #missions-list-container::after {
+            content: '';
+            display: block;
+            height: 220px;
+        }
+
+        /* Máscara para el efecto de desvanecimiento superior e inferior */
+        #missions-list-container {
+             mask-image: linear-gradient(
+                to bottom,
+                transparent,
+                black 25%,
+                black 75%,
+                transparent
+            );
+            padding: 0 20px; /* Padding lateral para que las tarjetas no toquen los bordes */
+        }
+
+        .mission-card {
+            padding: 20px;
+            margin-bottom: 15px; /* Espacio entre tarjetas */
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            overflow: hidden;
+            border: 2px solid transparent;
+            /* Las tarjetas están en flujo normal, no son 'sticky' */
+            position: relative; 
+
+            /* Estado por defecto: más pequeño y semi-transparente */
+            transform: scale(0.9);
+            opacity: 0.6;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        .mission-card.active {
+            transform: scale(1.1); /* La tarjeta activa es más grande */
+            opacity: 1;
+            background: var(--accent-gradient);
+            box-shadow: 0 8px 25px rgba(88, 101, 242, 0.4);
+        }
+        
+        .mission-card:not(.active):hover {
+            transform: scale(0.95);
+            opacity: 0.8;
+            border-color: rgba(88, 101, 242, 0.3);
+        }
+
+        .mission-number {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            font-size: 80px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.05);
+            z-index: 1;
+            transition: color 0.4s ease;
+        }
+
+        .mission-card.active .mission-number {
+            color: rgba(255,255,255,0.2);
+        }
+        
+        .mission-title {
+            position: relative;
+            z-index: 2;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: color 0.4s ease;
+        }
+
+        .mission-card.active .mission-title {
+            color: white;
+        }
+
+        #mission-details {
+            flex: 1;
+            padding: 30px 40px; 
+            background-color: rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .details-content {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #mission-details h2 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        #mission-details .hook { font-size: 16px; color: var(--text-muted); margin-bottom: 24px; }
+        #mission-details h3 { font-size: 16px; font-weight: 600; color: var(--primary-color); margin-bottom: 12px; }
+        
+        #mission-details ul { list-style: none; margin-bottom: 30px; }
+        #mission-details ul li {
+            font-size: 15px; color: var(--text-muted);
+            margin-bottom: 8px; padding-left: 25px; position: relative;
+        }
+        #mission-details ul li::before {
+            content: '✓'; position: absolute; left: 0;
+            color: var(--primary-color); font-weight: 700;
+        }
+
+        .ada-button {
+            display: inline-block;
+            padding: 14px 28px;
+            background: var(--accent-gradient);
+            color: #ffffff;
+            font-size: 16px; font-weight: 600;
+            text-decoration: none; border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .ada-button:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(88, 101, 242, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="widget-container">
+        <div id="missions-list-container">
+             <!-- Las tarjetas de misión se insertarán aquí -->
+        </div>
+        <div id="mission-details">
+             <!-- Los detalles de la misión seleccionada se mostrarán aquí -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // El JavaScript no necesita cambios, ya que la lógica del Observer
+            // sigue siendo correcta. Todo el ajuste es a nivel de CSS.
+            const missionsData = [
+                { title: 'Misión 1: Orquídea', hook: '¿Sientes la presión de ser "perfecto" en redes? ¿Lo que publicas es realmente quién eres?', learnings: ['Descubrir por qué a veces actuamos diferente en línea.', 'Identificar los estereotipos y cómo nos afectan.', 'Entender el impacto de compararte con los demás.'] },
+                { title: 'Misión 2: Magnolia', hook: 'Vamos a jugar a ser videntes: ¿qué dirá de ti tu perfil en 5 años? ¿Te gustará lo que veas?', learnings: ['Analizar cómo te ven los demás según lo que compartes.', 'Simular cómo tu identidad digital puede evolucionar.', 'Crear una autoimagen con la que te sientas genial.'] },
+                { title: 'Misión 3: Camelia', hook: 'Ese post de hace 3 años... ¿todavía te representa? Juguemos a ser detectives de tu propia huella digital.', learnings: ['Revisar tu historial de publicaciones como un pro.', 'Detectar qué información personal podría estar demasiado expuesta.', 'Aprender a "limpiar" tu pasado digital si es necesario.'] },
+                { title: 'Misión 4: Azucena', hook: '¿Y si te dijéramos que puedes controlar lo que internet sabe de ti? Es hora de tomar el poder.', learnings: ['Crear un plan de acción para proteger tu privacidad.', 'Prevenir riesgos antes de que ocurran.', 'Decidir conscientemente qué tan visible quieres ser.'] },
+                { title: 'Misión 5: Dalia', hook: '¿Realmente esa app necesita acceso a tu micrófono? Vamos a hackear tu seguridad digital.', learnings: ['Descubrir qué permisos tienen tus apps y por qué.', 'Crear contraseñas que sean (casi) imposibles de adivinar.', 'Corregir hábitos que ponen en riesgo tu información.'] },
+                { title: 'Misión 6: Gardenia', hook: '¿Público, privado, amigos de amigos? Domina los ajustes de privacidad de tus redes como un experto.', learnings: ['Controlar quién ve, comenta o te etiqueta en tus posts.', 'Configurar tus cuentas para máxima seguridad.', 'Usar herramientas de bloqueo y denuncia de forma efectiva.'] },
+                { title: 'Misión 7: Hortensia', hook: '¿Ese formulario para un juego online te pide demasiados datos? Aprende a detectar las banderas rojas.', learnings: ['Diferenciar entre datos públicos, privados y súper sensibles.', 'Decidir con seguridad cuándo es buena idea compartir información.', 'Reconocer formularios y sitios sospechosos al instante.'] },
+                { title: 'Misión 8: Jazmín', hook: 'Ese mensaje de un príncipe nigeriano parece falso... pero algunos engaños son más sutiles. ¿Puedes detectarlos?', learnings: ['Distinguir entre un fraude, un error y manipulación intencional.', 'Analizar perfiles y mensajes sospechosos para protegerte.', 'Decidir la mejor acción: ignorar, bloquear o reportar.'] },
+                { title: 'Misión 9: Lirio', hook: 'Recibes una cadena de WhatsApp sobre un premio increíble. ¿La reenvías o la rompes?', learnings: ['Entender tu responsabilidad al compartir información.', 'Aprender a crear alertas digitales para ayudar a tus amigos.', 'Convertirte en un muro contra los fraudes en tus grupos.'] },
+                { title: 'Misión 10: Narciso', hook: 'Viste una noticia increíble, pero... ¿es real? Vamos a darte un kit de detective para la verdad.', learnings: ['Validar si una fuente es confiable o no.', 'Hacer las preguntas clave para no caer en la desinformación.', 'Saber dónde y cómo verificar lo que lees en línea.'] },
+                { title: 'Misión 11: Rosa', hook: 'Titulares exagerados, fotos sacadas de contexto... La desinformación es un arte oscuro. Aprende a ver a través de ella.', learnings: ['Identificar noticias falsas, erróneas y hasta satíricas (memes).', 'Realizar ejercicios prácticos de verificación de información.', 'Detectar fotos y titulares manipulados antes que nadie.'] },
+                { title: 'Misión 12: Tulipán', hook: 'El drama digital es real. ¿Cómo actuar cuando una discusión en línea se sale de control?', learnings: ['Identificar diferentes tipos de agresión en línea (ciberacoso, odio).', 'Desarrollar estrategias para bloquear, reportar o intervenir con respeto.', 'Conocer tus derechos en las plataformas digitales.'] },
+                { title: 'Misión 13: Violeta', hook: '¿Sientes que no puedes soltar el celular? Descubre cómo la tecnología afecta tu cerebro y cómo puedes "hackearlo" a tu favor.', learnings: ['Mapear tus propios hábitos digitales (sin juicios).', 'Entender qué es el "Biohacking Digital" y cómo usarlo.', 'Optimizar tu bienestar usando la tecnología de forma inteligente.'] },
+                { title: 'Misión 14: Lavanda', hook: 'Esa foto perfecta en Instagram te hizo sentir mal... ¿Por qué? Identifiquemos los gatillos emocionales de las redes.', learnings: ['Reconocer emociones como la envidia o frustración digital.', 'Aprender técnicas reales para regular el tiempo que pasas en pantalla.', 'Usar apps y herramientas para crear un "modo concentración".'] },
+                { title: 'Misión 15: Amapola', hook: 'La presión por los likes, los seguidores, los filtros... Es agotador. Diseñemos tu plan de desintoxicación digital.', learnings: ['Entender cómo funciona la comparación social en línea.', 'Crear pausas activas para desconectar de forma consciente.', 'Construir un plan de autocuidado para tu sueño, pantalla y emociones.'] },
+                { title: 'Misión 16: Crisantemo', hook: 'Cuando buscas "CEO" en internet, ¿por qué salen más hombres? Descubre cómo la IA nos pone etiquetas sin que nos demos cuenta.', learnings: ['Entender qué es la clasificación y el sesgo algorítmico.', 'Ver ejemplos reales de cómo la IA puede ser injusta.', 'Reflexionar sobre cómo esto afecta tu identidad y oportunidades.'] },
+                { title: 'Misión 17: Loto', hook: 'Una IA diagnostica una enfermedad, pero se equivoca. ¿De quién es la culpa? Exploremos las grandes decisiones de la IA.', learnings: ['Analizar casos reales donde la IA acertó... y donde falló épicamente.', 'Entender cómo las decisiones automatizadas impactan la vida de las personas.', 'Evaluar críticamente si confiar o no en un sistema automático.'] },
+                { title: 'Misión 18: Cerezo', hook: 'Si una IA aprende de internet, y en internet hay cosas malas... ¿la IA puede aprender a ser injusta?', learnings: ['Conocer los factores que provocan errores en la IA (malos datos, reglas injustas).', 'Introducirte a los grandes dilemas de la justicia algorítmica.', 'Debatir si una IA puede ser verdaderamente neutral.'] },
+                { title: 'Misión 19: Geranio', hook: 'Cada clic, cada like, cada búsqueda crea un "tú" digital para la IA. ¿Sabes cómo es ese tú virtual?', learnings: ['Descubrir cómo funciona el perfilado algorítmico.', 'Entender cómo tus datos construyen una identidad que las empresas usan.', 'Tomar el primer paso para proteger tu autonomía.'] },
+                { title: 'Misión 20: Mimosa', hook: 'Tu perfil de IA dice que te gustan las películas de acción. ¿Por eso nunca te recomienda comedias románticas? Hablemos de riesgos.', learnings: ['Analizar cómo este perfilado puede limitarte o discriminarte.', 'Conocer tu derecho a cuestionar y modificar tu perfil.', 'Defenderte de la "discriminación algorítmica".'] }
+            ];
+
+            const adaLink = "https://chatgpt.com/g/g-6852d34661c08191a37b91ae25c0a5e7-ada-s1";
+            const listContainer = document.getElementById('missions-list-container');
+            const detailsPanel = document.getElementById('mission-details');
+            let missionCards = [];
+
+            function renderMissionList() {
+                missionsData.forEach((mission, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'mission-card';
+                    card.dataset.index = index;
+                    card.innerHTML = `<span class="mission-number">${index + 1}</span><h4 class="mission-title">${mission.title}</h4>`;
+                    listContainer.appendChild(card);
+                    missionCards.push(card);
+                });
+            }
+
+            function updateDetails(index) {
+                const mission = missionsData[index];
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'details-content';
+                contentDiv.innerHTML = `
+                    <h2>${mission.title}</h2>
+                    <p class="hook">${mission.hook}</p>
+                    <h3>En esta Misión, vas a:</h3>
+                    <ul>${mission.learnings.map(item => `<li>${item}</li>`).join('')}</ul>
+                    <a href="${adaLink}" target="_blank" class="ada-button">Iniciar Misión con ADA</a>
+                `;
+                // Reemplazar el contenido para reiniciar la animación
+                detailsPanel.innerHTML = ''; 
+                detailsPanel.appendChild(contentDiv);
+            }
+
+            function updateActiveCard(index) {
+                 missionCards.forEach((card, i) => card.classList.toggle('active', i == index));
+            }
+            
+            function setupScrollObserver() {
+                const options = {
+                    root: listContainer,
+                    rootMargin: '-50% 0px -50% 0px',
+                    threshold: 0
+                };
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const index = entry.target.dataset.index;
+                            updateDetails(index);
+                            updateActiveCard(index);
+                        }
+                    });
+                }, options);
+                missionCards.forEach(card => observer.observe(card));
+            }
+            
+            function setupClickListeners() {
+                listContainer.addEventListener('click', (e) => {
+                    const card = e.target.closest('.mission-card');
+                    if (card) {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+            }
+
+            renderMissionList();
+            setupScrollObserver();
+            setupClickListeners();
+            if (missionCards.length > 0) {
+                updateDetails(0);
+                updateActiveCard(0);
+            }
+        });
+    </script>
+
+</body>
+</html>
